@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Buffering &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Buffering
+                    </h1>
+                    <h2 class="headline">
+                    May 18, 2018 20:47
+                    · 566 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/golang">golang</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>最近碰到一个行缓冲(line buffering)方面的问题，有点意思。</p>
+
+<h2 id="背景">背景</h2>
+
+<p>某段 <code>golang</code> 代码中，需要解析 <code>virsh event --loop</code> 的输出，大概就是用
+<code>bufio</code> 里的 <code>Scanner</code> 来按行读取外部命令的输出。然而郁闷的是，代码里
+啥都读不到，除非 <code>virsh</code> 进程终止（间接地关闭了输出）。</p>
+
+<p>明显这是缓存的原因，而印象中，输出字符中包含 <code>\n</code> 时，会自动 flush 缓存。</p>
+
+<h2 id="重现未果">重现未果</h2>
+
+<p>先写了个简单的 <code>golang</code> 程序，用来模拟输出行为：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+
+<span style="color:#f92672">import</span> (
+	<span style="color:#e6db74">&#34;fmt&#34;</span>
+	<span style="color:#e6db74">&#34;time&#34;</span>
+)
+
+<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+	<span style="color:#66d9ef">for</span> <span style="color:#a6e22e">i</span> <span style="color:#f92672">:=</span> <span style="color:#ae81ff">0</span>; <span style="color:#a6e22e">i</span> &lt; <span style="color:#ae81ff">5</span>; <span style="color:#a6e22e">i</span><span style="color:#f92672">++</span> {
+		<span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;hello\n&#34;</span>)
+	}
+
+	<span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Sleep</span>(<span style="color:#ae81ff">2</span> <span style="color:#f92672">*</span> <span style="color:#a6e22e">time</span>.<span style="color:#a6e22e">Second</span>)
+}</code></pre></div>
+<p>运行 <code>go run test.go | cat</code>，发现五个 <code>hello</code> 一下子全打印了出来。</p>
+
+<h2 id="再次重现">再次重现</h2>
+
+<p>想着 <code>virsh</code> 是用 C 写的，查到 <code>libvirt</code> 的源代码里面，这里用的是
+<code>fputs</code>，因此又写了一段 C 代码试验：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;unistd.h&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">void</span>) {
+	<span style="color:#66d9ef">for</span> (<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>; i <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">5</span>; <span style="color:#f92672">++</span>i) {
+		fputs(<span style="color:#e6db74">&#34;hello</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, stdout);
+	}
+
+	sleep(<span style="color:#ae81ff">2</span>);
+	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+}</code></pre></div>
+<p>运行 <code>gcc test.c -o t2; ./t2 | cat</code>，五个 <code>hello</code> 在两秒之后才打印出来。</p>
+
+<h2 id="对比">对比</h2>
+
+<p>用 <code>strace</code> 对比一下两者的区别：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ go build test.go
+$ strace -ewrite -o x.txt ./test | cat
+hello
+hello
+hello
+hello
+hello
+$ cat x.txt
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\n&#34;</span>, 6<span style="color:#f92672">)</span>                  <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\n&#34;</span>, 6<span style="color:#f92672">)</span>                  <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\n&#34;</span>, 6<span style="color:#f92672">)</span>                  <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\n&#34;</span>, 6<span style="color:#f92672">)</span>                  <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\n&#34;</span>, 6<span style="color:#f92672">)</span>                  <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
++++ exited with <span style="color:#ae81ff">0</span> +++
+
+$ strace -ewrite -o x.txt ./t2 | cat
+hello
+hello
+hello
+hello
+hello
+$ cat x.txt
+write<span style="color:#f92672">(</span>1, <span style="color:#e6db74">&#34;hello\nhello\nhello\nhello\nhello\n&#34;</span>, 30<span style="color:#f92672">)</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
++++ exited with <span style="color:#ae81ff">0</span> +++</code></pre></div>
+<p>原来 <code>golang</code> 版本里面的输出没有缓冲，而 C 版本的有缓冲。</p>
+
+<h2 id="换行缓冲">换行缓冲</h2>
+
+<p><code>man 3 setbuf</code> 查到如下信息：</p>
+<pre><code>when it is line buffered characters are saved up until a newline
+is output or input is read from any stream attached to a terminal
+device (typically stdin).</code></pre>
+<p>原来换行时自动缓冲是对输出是终端设备的时候才生效。
+<a href="https://stackoverflow.com/questions/1716296">这里</a>把这个问题解释得很
+清楚。</p>
+
+<h2 id="解决办法">解决办法</h2>
+
+<p><code>GNU coreutils</code> 提供了一个命令 <code>stdbuf</code> 来设置被运行程序的行缓冲。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ stdbuf -o <span style="color:#ae81ff">0</span> command</code></pre></div>
+<p>这样，<code>command</code> 运行时的标准输出就会取消行缓冲。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

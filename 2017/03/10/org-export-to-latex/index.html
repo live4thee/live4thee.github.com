@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>org export to latex &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        org export to latex
+                    </h1>
+                    <h2 class="headline">
+                    Mar 10, 2017 00:00
+                    · 211 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/orgmode">orgmode</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>最近写 <code>orgmode</code> 笔记的时候碰到几个问题：</p>
+
+<ol>
+<li>code block 没有语法高亮；</li>
+<li>输出的 pdf 文件中，python 代码对齐出错；</li>
+<li>输出的 pdf 文件中，源代码没有高亮。</li>
+</ol>
+
+<p>解决办法如下：</p>
+<pre><code>;; fontify the code block in orgmode
+(setq org-src-fontify-natively t)
+
+;; for space sensitive languages like Python
+(setq org-src-preserve-indentation t)
+
+;; highlight source blocks with LaTeX listings
+(require &#39;ox-latex)
+(setq org-latex-listings t)
+(add-to-list &#39;org-latex-packages-alist &#39;(&#34;&#34; &#34;listings&#34;))
+(add-to-list &#39;org-latex-packages-alist &#39;(&#34;&#34; &#34;color&#34;))</code></pre>
+<p>添加如下 <code>LaTeX header</code> 设置 <code>listings</code> 风格：</p>
+<pre><code>#+LATEX_HEADER: \lstset{
+#+LATEX_HEADER:     keywordstyle=\color{blue},
+#+LATEX_HEADER:     commentstyle=\color{red},
+#+LATEX_HEADER:     stringstyle=\color{green},
+#+LATEX_HEADER:     basicstyle=\ttfamily\small,
+#+LATEX_HEADER:     columns=fullflexible,
+#+LATEX_HEADER:     basewidth={0.5em,0.4em}
+#+LATEX_HEADER: }</code></pre>
+<p>最后，文档里有中文的时候：</p>
+<pre><code>#+LATEX_HEADER: \usepackage{xltxtra}</code></pre>
+<p>因为 <code>xltxtra</code> 会自动引用 <code>fontspec</code>，没有它输出的 pdf 里面中文会被过
+滤掉。<code>xltxtra</code> 还定义了两个 logo: <code>\XeTeX</code> 和 <code>\XeLaTeX</code>。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

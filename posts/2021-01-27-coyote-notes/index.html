@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Coyote Notes - 1 &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Coyote Notes - 1
+                    </h1>
+                    <h2 class="headline">
+                    Jan 27, 2021 15:35
+                    · 314 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/.net">.Net</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>这几天在学 <a href="https://microsoft.github.io/coyote/">coyote</a>，做个笔记。</p>
+
+<h3 id="入口">入口</h3>
+
+<p>测试入口函数<a href="https://microsoft.github.io/coyote/#tutorials/hello-world-tasks/#summary">必须</a>
+带有属性<code>[Microsoft.Coyote.SystematicTesting.Test]</code>，
+且是命名为 <code>Execute</code> 的静态函数：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#"><span style="color:#a6e22e">[Microsoft.Coyote.SystematicTesting.Test]</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> Execute(IActorRuntime runtime)
+{
+    LogWriter.Initialize(runtime.Logger, RunForever);
+    runtime.OnFailure += OnRuntimeFailure;
+    runtime.RegisterMonitor&lt;LivenessMonitor&gt;();
+    runtime.RegisterMonitor&lt;SafetyMonitor&gt;();
+    <span style="color:#75715e">// ...
+</span><span style="color:#75715e"></span>}
+</code></pre></div>
+<p>但看了示例之后发现有<strong>例外</strong>：</p>
+
+<p>如果被测代码是用原生<code>System.Threading.Tasks.Task</code> 写的，需要用 rewrite 技术来替换：</p>
+
+<ul>
+<li>测试函数需要是静态函数（但名字不需要叫做<code>Execute</code>）；</li>
+<li>测试函数有属性 <code>[Microsoft.Coyote.SystematicTesting.Test]</code>。</li>
+</ul>
+
+<p>例如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c#" data-lang="c#"><span style="color:#a6e22e">[Microsoft.Coyote.SystematicTesting.Test]</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> TestXXX(ICoyoteRuntime runtime)
+{
+    CheckRewritten();
+    <span style="color:#75715e">// ... test code ...
+</span><span style="color:#75715e"></span>    Microsoft.Coyote.Specifications.Specification.Assert(x == n, <span style="color:#e6db74">&#34;error message&#34;</span>);
+	<span style="color:#75715e">// ... other test code ...
+</span><span style="color:#75715e"></span>}
+</code></pre></div>
+<h3 id="main-函数">Main 函数</h3>
+
+<p>用 <code>coyote test</code> 进行测试时，<code>Main</code> 函数是不会执行的。如前所述，入口函
+数是 <code>Execute</code>。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>OData Pitfalls &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        OData Pitfalls
+                    </h1>
+                    <h2 class="headline">
+                    Mar 25, 2015 00:00
+                    · 198 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/odata">OData</a>
+                          
+                              <a href="https://live4thee.github.io/tags/webapi">WebApi</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>I have been writing WebApi with <a href="http://www.odata.org">OData</a> v4 these
+days. While it is really fast, and convenient, I experienced a few
+pitfalls which costs me several hours.</p>
+
+<h2 id="url-sensitivity">URL Sensitivity</h2>
+
+<p>The path segment etc. are case sensitive by default. Thus, you would
+probably receive an HTTP 404 when GET <code>~/api/customers</code> instead of
+<code>~/api/Customers</code>.</p>
+
+<h2 id="string-parameter-issue">String Parameter Issue</h2>
+
+<p>Assuming that I have a bound function <code>GetCustomerX</code> for the entity
+type <code>Customer</code>, and it is indexed with a string identifier.</p>
+<pre><code>public IHttpActionResult GetCustomerX(string key)</code></pre>
+<p>When calling into this function with string <code>'foo'</code>, the parameter
+<code>key</code> will be bounded to a single quoted string <code>'foo'</code>. To escape
+from the single quote, you need to decorate the <code>key</code> parameter with
+<code>FromODataUri</code> attribute.</p>
+<pre><code>public IHttpActionResult GetCustomerX([FromODataUri] string key)</code></pre>
+<h2 id="404-on-function-routing">404 on Function Routing</h2>
+
+<p>This issue almost drove me crazy. I had a bound function, but always
+got a 404 error, by all means. And it turns out that, I missed the
+following configuration in my <code>web.config</code>.</p>
+<pre><code>&lt;system.webServer&gt;
+  &lt;modules runAllManagedModulesForAllRequests=&#34;true&#34; /&gt;
+&lt;/system.webServer&gt;</code></pre>
+<p>I found this solution from
+<a href="https://stackoverflow.com/questions/25311955/web-api-2-2-odata-v4-function-routing">stackoverflow</a>.</p>
+
+<h2 id="further-readings">Further Readings</h2>
+
+<p>The issues above in fact have <strong>all</strong> been captured in
+<a href="http://odata.github.io/WebApi/">OData Web API document</a>. Make sure
+you read it before building WebApi with OData in production code.</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

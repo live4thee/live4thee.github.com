@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Looking Back &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Looking Back
+                    </h1>
+                    <h2 class="headline">
+                    Jun 29, 2016 00:00
+                    · 335 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/startup">startup</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<h2 id="number-of-code-commits">Number of Code Commits</h2>
+
+<p>今天是加入创业整整三个月。除去清明、五一以及端午加上自己请假，一共休息
+了两个礼拜，实际为两个半月。其间 <code>Java</code> 代码相关的改动提交了 <code>46</code> 个，
+<code>Python</code>相关 <code>16</code> 个，<code>Golang</code> 最多，为 <code>162</code> 次。统计方法也很简单：</p>
+<pre><code>$ for r in $repos; do
+    cd $r
+    git log --since &#39;3 months ago&#39; --author live4thee | grep -c ^commit
+    cd - &gt; /dev/null
+done</code></pre>
+<h2 id="number-of-notes">Number of Notes</h2>
+
+<p>笔记一共记了两千多行 - 但因为是用 <code>Emacs</code> + <code>orgmode</code>，且打开了
+<code>auto-fill</code> 做自动换行，所以每行字数很少。英文本身也会比汉字用字多一点。</p>
+<pre><code>$ wc -l *.org | tail -1
+2209</code></pre>
+<h2 id="the-good-and-the-bad">The Good and The Bad</h2>
+
+<p>为小伙伴们做了一次 tech-talk，一次 demo &ndash; 然而工作进度却<code>拖延了两次</code>。
+这在过去将近 9 年的职业生涯内，应该是从未有之。知耻而后勇。</p>
+
+<h2 id="misc">Misc.</h2>
+
+<p>一个月前关闭了微信朋友圈 - 自己可以发更新，却不会收到朋友的状态更新。
+(这种行为有点像曹操的某个名言 -_-） 嗯，偶尔也会打开刷一刷。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

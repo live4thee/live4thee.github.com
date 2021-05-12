@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Chroot to Rescue! &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Chroot to Rescue!
+                    </h1>
+                    <h2 class="headline">
+                    Sep 3, 2019 10:56
+                    · 333 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/sysadmin">sysadmin</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>很久之前，为了合规，公司换用了合法的 VPN 提供商。然而自此之后，我的
+VPN 接入就成了问题。</p>
+
+<ol>
+<li>对方号称有 Linux 客户端，但是官网不能下载；</li>
+<li>对方的设备提供 L2TP 服务，然而跑一段时间就会挂掉。</li>
+</ol>
+
+<p>前几天 IT 部门的小伙终于从供应商要到了 Linux 客户端，抓到本地一看，脚
+本和文档都写的贼矬。64-bit 系统上还是得跑 32-bit 的预编译好的程序。抱
+着怀疑的态度，我在本地设置了一个 chroot 环境：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ sudo apt-get install debootstrap schroot
+
+<span style="color:#75715e"># the VPN client is for Ubuntu 16.04</span>
+$ sudo debootstrap --variant<span style="color:#f92672">=</span>minbase --arch i386 xenial <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>	/var/chroot/ http://mirrors.163.com/ubuntu/
+
+$ sudo cat<span style="color:#e6db74">&lt;&lt;EOF &gt;&gt;/etc/schroot/schroot.conf
+</span><span style="color:#e6db74">&gt; [xenial]
+</span><span style="color:#e6db74">&gt; description=Ubuntu Xenial
+</span><span style="color:#e6db74">&gt; directory=/var/chroot
+</span><span style="color:#e6db74">&gt; users=guest
+</span><span style="color:#e6db74">&gt; groups=adm
+</span><span style="color:#e6db74">&gt; root-groups=root
+</span><span style="color:#e6db74">&gt; personality=linux32
+</span><span style="color:#e6db74">&gt; EOF</span>
+
+$ sudo cp -r vpn-client /var/chroot/home/guest/
+$ sudo schroot -l
+chroot:xenial
+$ sudo schroot -c chroot:xenial -u root</code></pre></div>
+<p>进到 chroot 环境后，按照手册顺利拨号成功。根据提供的命令查看连接状态，
+也一直显示成功。然而还是连不上公司的网络。无奈换用 Windows 机器，得到
+登录报告：“用户已经登录，是否踢掉？”</p>
+
+<p>Systemd v239 开始支持
+<a href="http://0pointer.net/blog/walkthrough-for-portable-services.html">Portable Services</a>,
+ 系统有 239 更新后可以试试。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

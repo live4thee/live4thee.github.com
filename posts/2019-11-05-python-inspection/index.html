@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Python Inspection &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Python Inspection
+                    </h1>
+                    <h2 class="headline">
+                    Nov 5, 2019 10:42
+                    · 421 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/python">python</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>作为程序员，经常有查看源代码的需求。如果没有代码，能反汇编也不至于两眼
+摸黑。Python 这方面的支持做的挺不错。</p>
+
+<h2 id="inspect">inspect</h2>
+
+<p><a href="https://docs.python.org/3/library/inspect.html">inspect</a> 定义了很多有
+用的函数，比如：<em>getsource</em></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#f92672">import</span> netaddr
+<span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#f92672">import</span> inspect
+<span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#66d9ef">print</span>(inspect<span style="color:#f92672">.</span>getsource(netaddr<span style="color:#f92672">.</span>cidr_to_glob))
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">cidr_to_glob</span>(cidr):
+    <span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">    A function that accepts an IP subnet in a glob-style format and returns
+</span><span style="color:#e6db74">    a list of CIDR subnets that exactly matches the specified glob.
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    :param cidr: an IP object CIDR subnet.
+</span><span style="color:#e6db74">
+</span><span style="color:#e6db74">    :return: a list of one or more IP addresses and subnets.
+</span><span style="color:#e6db74">    &#34;&#34;&#34;</span>
+    ip <span style="color:#f92672">=</span> IPNetwork(cidr)
+    globs <span style="color:#f92672">=</span> iprange_to_globs(ip[<span style="color:#ae81ff">0</span>], ip[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>])
+    <span style="color:#66d9ef">if</span> len(globs) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">1</span>:
+        <span style="color:#75715e">#   There should only ever be a one to one mapping between a CIDR and</span>
+        <span style="color:#75715e">#   an IP glob range.</span>
+        <span style="color:#66d9ef">raise</span> AddrConversionError(<span style="color:#e6db74">&#39;bad CIDR to IP glob conversion!&#39;</span>)
+    <span style="color:#66d9ef">return</span> globs[<span style="color:#ae81ff">0</span>]
+
+<span style="color:#f92672">&gt;&gt;&gt;</span></code></pre></div>
+<h2 id="dis">dis</h2>
+
+<p><a href="https://docs.python.org/3/library/dis.html">dis</a> 用来反汇编 Python 字
+节码。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#f92672">import</span> dis
+<span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">add</span>(a, b): <span style="color:#66d9ef">return</span> a<span style="color:#f92672">+</span>b
+<span style="color:#f92672">...</span>
+<span style="color:#f92672">&gt;&gt;&gt;</span> dis<span style="color:#f92672">.</span>dis(add)
+  <span style="color:#ae81ff">1</span>           <span style="color:#ae81ff">0</span> LOAD_FAST                <span style="color:#ae81ff">0</span> (a)
+              <span style="color:#ae81ff">3</span> LOAD_FAST                <span style="color:#ae81ff">1</span> (b)
+              <span style="color:#ae81ff">6</span> BINARY_ADD
+              <span style="color:#ae81ff">7</span> RETURN_VALUE
+<span style="color:#f92672">&gt;&gt;&gt;</span></code></pre></div>
+<h2 id="gdb">gdb</h2>
+
+<p>无论 <em>dis</em> 还是 <em>inspect</em> 都不能处理 C 实现的的函数。比如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#f92672">from</span> fcntl <span style="color:#f92672">import</span> flock
+<span style="color:#f92672">&gt;&gt;&gt;</span> dis<span style="color:#f92672">.</span>dis(flock)
+Traceback (most recent call last):
+  File <span style="color:#e6db74">&#34;&lt;stdin&gt;&#34;</span>, line <span style="color:#ae81ff">1</span>, <span style="color:#f92672">in</span> <span style="color:#f92672">&lt;</span>module<span style="color:#f92672">&gt;</span>
+  File <span style="color:#e6db74">&#34;/usr/lib/python2.7/dis.py&#34;</span>, line <span style="color:#ae81ff">49</span>, <span style="color:#f92672">in</span> dis
+    type(x)<span style="color:#f92672">.</span>__name__
+<span style="color:#a6e22e">TypeError</span>: don<span style="color:#e6db74">&#39;t know how to disassemble builtin_function_or_method objects</span></code></pre></div>
+<p>这种情况下，<em>gdb</em> 就成了不二之选。先把 debug 包给装上：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ sudo debuginfo-install <span style="color:#e6db74">`</span>rpm -q python<span style="color:#e6db74">`</span></code></pre></div>
+<p>先 attach 到被调试的 python 进程，假设 pid 是 11170. 然后 &lsquo;pi&rsquo; 进入
+Python 交互环境。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ gdb python <span style="color:#ae81ff">11170</span>
+<span style="color:#f92672">(</span>gdb<span style="color:#f92672">)</span> pi</code></pre></div>
+<p>接下来，反汇编：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-py" data-lang="py"><span style="color:#f92672">&gt;&gt;&gt;</span> <span style="color:#f92672">from</span> fcntl <span style="color:#f92672">import</span> flock
+<span style="color:#f92672">&gt;&gt;&gt;</span> frame<span style="color:#f92672">=</span>gdb<span style="color:#f92672">.</span>selected_frame()
+<span style="color:#f92672">&gt;&gt;&gt;</span> arch<span style="color:#f92672">=</span>frame<span style="color:#f92672">.</span>architecture()
+<span style="color:#f92672">&gt;&gt;&gt;</span> arch<span style="color:#f92672">.</span>disassemble(flock)
+Traceback (most recent call last):
+  File <span style="color:#e6db74">&#34;&lt;stdin&gt;&#34;</span>, line <span style="color:#ae81ff">1</span>, <span style="color:#f92672">in</span> <span style="color:#f92672">&lt;</span>module<span style="color:#f92672">&gt;</span>
+<span style="color:#a6e22e">TypeError</span>: argument <span style="color:#ae81ff">1</span> must be integer<span style="color:#f92672">&lt;</span>K<span style="color:#f92672">&gt;</span>, <span style="color:#f92672">not</span> builtin_function_or_method
+<span style="color:#f92672">&gt;&gt;&gt;</span> flock<span style="color:#f92672">.</span>__str__
+<span style="color:#f92672">&lt;</span>method<span style="color:#f92672">-</span>wrapper <span style="color:#e6db74">&#39;__str__&#39;</span> of builtin_function_or_method object at <span style="color:#ae81ff">0x7fad357181b8</span><span style="color:#f92672">&gt;</span>
+<span style="color:#f92672">&gt;&gt;&gt;</span> arch<span style="color:#f92672">.</span>disassemble(<span style="color:#ae81ff">0x7fad357181b8</span>)
+Traceback (most recent call last):
+  File <span style="color:#e6db74">&#34;&lt;stdin&gt;&#34;</span>, line <span style="color:#ae81ff">1</span>, <span style="color:#f92672">in</span> <span style="color:#f92672">&lt;</span>module<span style="color:#f92672">&gt;</span>
+gdb<span style="color:#f92672">.</span>MemoryError: Cannot access memory at address <span style="color:#ae81ff">0x7fad357181b8</span>
+<span style="color:#f92672">&gt;&gt;&gt;</span></code></pre></div>
+<p>看来，不咋行。还是老老实实看<a href="https://github.com/python/cpython/blob/master/Modules/fcntlmodule.c#L38">源代码</a>吧！</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Syscalls by Process &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Syscalls by Process
+                    </h1>
+                    <h2 class="headline">
+                    Feb 2, 2021 12:37
+                    · 357 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/sysadmin">sysadmin</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>自 Linux 2.6.27 开始，可以通过文件 <code>/proc/[pid]/syscall</code> 得知进程号为
+<code>pid</code> 的进程正在做什么系统调用。比如：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ sudo cat /proc/$$/syscall
+<span style="color:#ae81ff">61</span> 0xffffffff 0x7ffddd4c4000 0xa 0x0 0x0 0x7 0x7ffddd4c3fe8 0x7ff09ab37dba </code></pre></div>
+<p>这里，第一个字段是系统调用号。后面一次是系统调用的第一、二&hellip;个参数。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ echo <span style="color:#e6db74">&#39;#include &lt;asm/unistd.h&gt;&#39;</span> | gcc -dM -E - | grep -w <span style="color:#ae81ff">61</span>
+<span style="color:#75715e">#define __NR_wait4 61</span></code></pre></div>
+<p>第一个参数 61 代表了系统调用 <code>wait4</code>，结合 <code>wait4</code>的原型：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">pid_t <span style="color:#a6e22e">wait4</span>(pid_t pid, <span style="color:#66d9ef">int</span> <span style="color:#f92672">*</span>wstatus, <span style="color:#66d9ef">int</span> options, <span style="color:#66d9ef">struct</span> rusage <span style="color:#f92672">*</span>rusage);</code></pre></div>
+<ul>
+<li>第一个参数 <code>0xffffffff</code>（-1），就是等待任意子进程；</li>
+<li>第二个参数 <code>0x7ffddd4c4000</code> 是子进程的返回状态的存放地址；</li>
+<li>第三个参数，<code>0xa</code> 应该是 <code>WUNTRACED|WCONTINUED</code>；</li>
+<li>第四个参数，<code>0</code> 代表空指针。</li>
+</ul>
+
+<p>需要注意的是，Linux 中 x86_32  和 x86_64 的系统调用号是不一样的。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ echo <span style="color:#e6db74">&#39;#include &lt;asm/unistd.h&gt;&#39;</span> | gcc -D__i386__ -dM -E - | grep __NR_wait4
+<span style="color:#75715e">#define __NR_wait4 114</span></code></pre></div>
+<p>如果想查看进程是否等待在 mutex 上，x86_64 上只需要查找系统调用号为 202
+<code>(__NR_futex)</code>，且 <code>futex_op</code> 为 <code>FUTEX_WAIT</code>(0) 的记录即可。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ sudo cat /proc/$pid/syscall | awk <span style="color:#e6db74">&#39;$1 == 202 &amp;&amp; $3 == &#34;0x0&#34;&#39;</span></code></pre></div>
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

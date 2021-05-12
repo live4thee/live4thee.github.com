@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>.Net Core on Linux - 2 &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        .Net Core on Linux - 2
+                    </h1>
+                    <h2 class="headline">
+                    Feb 9, 2021 15:48
+                    · 796 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/.net">.Net</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<h2 id="dotnet-publish">dotnet publish</h2>
+
+<p><code>dotnet publish</code> - Publishes the application and its dependencies to a folder for deployment to a hosting system.</p>
+
+<p>试验了一下打包应用，放到别的 Linux 机器（没有.Net 运行时）上跑。</p>
+
+<h3 id="自包含应用">自包含应用</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet publish -h
+...
+-f, --framework &lt;FRAMEWORK&gt;           The target framework to publish <span style="color:#66d9ef">for</span>.
+-r, --runtime &lt;RUNTIME_IDENTIFIER&gt;    The target runtime to publish <span style="color:#66d9ef">for</span>.
+...
+--self-contained    Publish the .NET runtime with your application so the runtime
+                    does not need to be installed on the target machine.
+                    The default is <span style="color:#e6db74">&#39;true&#39;</span> <span style="color:#66d9ef">if</span> a runtime identifier is specified.
+
+$ dotnet publish -r linux-x64 -f net5.0 -o ./linux-publish
+$ du -sh linux-publish/
+76M     linux-publish/
+$ ls -1 linux-publish/*.dll | wc -l
+<span style="color:#ae81ff">193</span></code></pre></div>
+<p>看了一下 <code>dotnet publish -h</code> 的输出，有一个 <code>--self-contained</code> 选项，
+可以用来打包自包含应用，且 <code>-r</code> 指定了目标运行时的话就隐含了自包含。
+打包的结果是个文件夹，包含了应用本身以及依赖的库。</p>
+
+<h3 id="自包含单体应用">自包含单体应用</h3>
+
+<p>显然，这没有 <code>go build</code> 生成出来一个单体应用方便。网上搜了一下，有个额
+外参数 <code>-p:PublishSingleFile=true</code>.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet publish -r linux-x64 -f net5.0 -p:PublishSingleFile<span style="color:#f92672">=</span>true -o ./linux-publish
+$ du -sh linux-publish/
+64M     linux-publish/
+$ ls linux-publish/
+MyApp  MyApp.pdb
+$ file linux-publish/MyApp
+linux-publish/MyApp: ELF 64-bit LSB shared object, x86-64, version <span style="color:#ae81ff">1</span> <span style="color:#f92672">(</span>SYSV<span style="color:#f92672">)</span>,
+dynamically linked, interpreter/lib64/ld-linux-x86-64.so.2, <span style="color:#66d9ef">for</span> GNU/Linux 2.6.32,
+BuildID<span style="color:#f92672">[</span>sha1<span style="color:#f92672">]=</span>42c923debe410c089a93997a66ef968f8574a077, stripped, too many notes <span style="color:#f92672">(</span>256<span style="color:#f92672">)</span></code></pre></div>
+<p>是个已经去掉符号表的可执行程序，虽然 64MB 比之前 76MB 小一点，但还是偏
+大。</p>
+
+<h3 id="upx-ucl-https-upx-github-io"><a href="https://upx.github.io/">upx-ucl</a></h3>
+
+<p>拿 <code>upx-ucl</code> 压缩一下？</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ upx-ucl MyApp
+                       Ultimate Packer <span style="color:#66d9ef">for</span> eXecutables
+                          Copyright <span style="color:#f92672">(</span>C<span style="color:#f92672">)</span> <span style="color:#ae81ff">1996</span> - <span style="color:#ae81ff">2018</span>
+UPX 3.95        Markus Oberhumer, Laszlo Molnar &amp; John Reiser   Aug 26th <span style="color:#ae81ff">2018</span>
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+  <span style="color:#ae81ff">66467643</span> -&gt;  <span style="color:#ae81ff">27944636</span>   42.04%   linux/amd64   MyApp
+
+Packed <span style="color:#ae81ff">1</span> file.
+
+$ du -h MyApp
+27M     MyApp</code></pre></div>
+<p>64 MB 压缩到 27 MB，很可观。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"> ./MyApp
+Failure processing application bundle; possible file corruption.
+Arithmetic overflow <span style="color:#66d9ef">while</span> reading bundle.
+A fatal error occured <span style="color:#66d9ef">while</span> processing application bundle</code></pre></div>
+<p>又有什么用？</p>
+
+<h3 id="自包含单体应用-瘦身">自包含单体应用 - 瘦身</h3>
+
+<p>去<a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish">官网</a>查看<code>PublishSingleFile</code>的文档，查到了两个信息：</p>
+
+<h4 id="p-publishsinglefile-true">-p:PublishSingleFile=true</h4>
+
+<p>Packages the app into a platform-specific single-file executable. The
+executable is self-extracting and contains all dependencies (including
+native) that are required to run the app. When the app is first run,
+the application is extracted to a directory based on the app name and
+build identifier. Startup is faster when the application is run
+again. The application doesn&rsquo;t need to extract itself a second time
+unless a new version is used. Available since .NET Core 3.0 SDK.</p>
+
+<p>For more information about single-file publishing, see the
+ <a href="https://github.com/dotnet/designs/blob/master/accepted/2020/single-file/design.md">single-file bundler design document</a>.</p>
+
+<p>We recommend that you specify this option in a publish profile rather
+than on the command line. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish#msbuild">MSBuild</a>.</p>
+
+<h4 id="p-publishtrimmed-true">-p:PublishTrimmed=true</h4>
+
+<p>Trims unused libraries to reduce the deployment size of an app when
+publishing a self-contained executable. For more information, see
+<a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/trim-self-contained">Trim self-contained deployments and executables</a>. Available since .NET Core
+3.0 SDK as a preview feature.</p>
+
+<p>We recommend that you specify this option in a publish profile rather
+than on the command line. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish#msbuild">MSBuild</a>.</p>
+
+<p>首先，single-file executable 其实是个打包了依赖的自解压程序；另外其实
+有 <code>PublishTrimmed</code> 来做这个瘦身工作。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet publish -r linux-x64 -f net5.0 -p:PublishSingleFile<span style="color:#f92672">=</span>true <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p:PublishTrimmed<span style="color:#f92672">=</span>true -o ./linux-publish
+$ du -sh linux-publish/
+34M     linux-publish/</code></pre></div>
+<p>64 MB 瘦身到 34 MB，但明显运行耗时长很多。<code>Single-file publish</code>的设计
+<a href="https://github.com/dotnet/designs/blob/main/accepted/2020/single-file/design.md">文档</a>
+里提到：bundler 里面其实打包了 PEImage Loader. 因此，Linux下这个单体程
+序其实是个披着 ELF 外壳的 PE 程序。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Hunting a Bug (6) &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Hunting a Bug (6)
+                    </h1>
+                    <h2 class="headline">
+                    Apr 11, 2017 00:00
+                    · 411 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/java">java</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>今天调试一个 <code>bug</code> 的过程非常有趣，起承转合很像央视《走近科学》的风格。
+故障代码类似于这样：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java"><span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>mgr<span style="color:#f92672">.</span><span style="color:#a6e22e">getSomeObj</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSomeField</span><span style="color:#f92672">()</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">null</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+    hostnum <span style="color:#f92672">=</span> mgr<span style="color:#f92672">.</span><span style="color:#a6e22e">getSomeObj</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSomeField</span><span style="color:#f92672">();</span>
+<span style="color:#f92672">}</span> <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+    <span style="color:#75715e">// ...
+</span><span style="color:#75715e"></span><span style="color:#f92672">}</span></code></pre></div>
+<p>断点成功断在第一行，单步进入 <code>getSomeField</code> 后确定返回的是 <code>null</code>。然
+后神奇的事情发生了：再次单步就发生了 <code>NullPointerException</code>。既没有进
+入 <code>if</code> 块，也没有进入 <code>else</code> 块。简直不敢相信自己的眼睛 - 不相信就对
+了，因为远程执行的代码和本地 <code>IntelliJ</code> 打开的代码不一样。远程的代码应
+该类似这样：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-java" data-lang="java">foo <span style="color:#f92672">=</span> mgr<span style="color:#f92672">.</span><span style="color:#a6e22e">getSomeObj</span><span style="color:#f92672">().</span><span style="color:#a6e22e">getSomeField</span><span style="color:#f92672">();</span></code></pre></div>
+<p>从 JVM 的角度去理解，本地和远程在出错前跑的代码都是一样的（也许这也是
+<code>IntelliJ</code> 一直没有报错说代码不匹配的原因）：</p>
+<pre><code>325: getfield        #546
+328: invokeinterface #1389, 1
+333: invokevirtual   #1421 // getSomeField()
+336: invokevirtual   #288  // java/lang/Integer.intValue:()I</code></pre>
+<p><code>NullPointerException</code> 是 <code>336</code> 导致的。因为远程代码中，<code>foo</code> 被声明为
+<code>int</code>，而 <code>getSomeField()</code> 返回的是 <code>Integer</code>。由于编译器自动 <code>unbox</code>，
+对 <code>null</code> 值进行了 <code>intValue()</code> 计算，发生了异常。</p>
+
+<p>其实这个<code>bug</code>半个月前同事就修复了，而测试团队用的是老的代码。又恰好
+<code>336</code> 前所有 JVM 指令也都是一样的，<code>IntelliJ</code> 也没有报告代码不匹配，造
+成了这个神秘的假象。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

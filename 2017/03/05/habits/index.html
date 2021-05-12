@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Habits &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Habits
+                    </h1>
+                    <h2 class="headline">
+                    Mar 5, 2017 00:00
+                    · 443 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/orgmode">orgmode</a>
+                          
+                              <a href="https://live4thee.github.io/tags/vim">vim</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>折腾了一把 <code>vscode</code> + <code>markdown</code> 后，还是回到了 <code>Emacs</code> + <code>orgmode</code> 的
+老路。可谓“积习难改”。</p>
+
+<h2 id="emacs-with-git">Emacs with git</h2>
+
+<p>我的 <code>orgmode</code> 文档通过远程 <code>git</code> 仓库同步。<code>Windows</code> 下面我装了一个
+<code>GitHub for Windows</code><sup class="footnote-ref" id="fnref:gh-win"><a href="#fn:gh-win">1</a></sup>，然后把 <code>Emacs</code> 的启动方式改成用 <code>Git
+Shell</code> 启动即可。方法是在 <code>GitHub for Windows</code> 的安装路径下复制一份
+<code>shell.ps1</code>，改为 <code>emacs.ps1</code> 然后在里面加载完环境变量的代码路径后，加
+上 <code>start path\to\your\runemacs.exe</code>。然后桌面新建一个快捷方式：</p>
+<pre><code>powershell.exe -windowstyle hidden -executionpolicy bypass -File emacs.ps1</code></pre>
+<h2 id="执念">执念</h2>
+
+<p>大家都知道 <code>Unix</code> 最著名的一句设计理念：<code>Do one thing and do it
+well</code>. 但不是所有的古老的 <code>Unix</code> 下能跑的程序都追随了这个理念。比如：
+<code>Emacs</code>.</p>
+
+<ol>
+<li><p>有人讽刺说：<code>&quot;Emacs was designed with the fear that some day the OS
+won't be there.&quot;</code><sup class="footnote-ref" id="fnref:emacs"><a href="#fn:emacs">2</a></sup></p></li>
+
+<li><p><code>Vim</code> 用户也一直嘲笑 <code>Emacs</code> 是 <code>&quot;A great operating system, lacking
+only a decent editor.&quot;</code></p></li>
+</ol>
+
+<p>对于第一条讽刺，我看见了一条反驳：</p>
+<pre><code>(replace-regexp-in-string &#34;fear&#34; &#34;hope&#34;)</code></pre>
+<p>曾经最美好的一段时间，我用 <code>Emacs</code> 处理新闻组、电子邮件、<code>Twitter</code> 以
+及<code>gtalk</code> 在内的各种网络聊天（通过 <code>bitlbee</code>）。</p>
+
+<h2 id="vim">Vim</h2>
+
+<p>从 <code>RedHat 7.1/7.2</code> 的年代开始接触 Linux，至今十几年了。<code>vim</code> 和
+<code>emacs</code> 是我的两个心头好。在编辑体验方面，这两者无可替代。</p>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:gh-win">GitHub desktop, <a href="https://desktop.github.com/">https://desktop.github.com/</a>
+ <a class="footnote-return" href="#fnref:gh-win"><sup>[return]</sup></a></li>
+<li id="fn:emacs">Emacs standing alone on a Linux Kernel, <a href="https://news.ycombinator.com/item?id=8325308">https://news.ycombinator.com/item?id=8325308</a>
+ <a class="footnote-return" href="#fnref:emacs"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>life on Life as a Programmer</title>
+    <link>https://live4thee.github.io/tags/life/</link>
+    <description>Recent content in life on Life as a Programmer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 17 Mar 2019 21:56:46 +0800</lastBuildDate>
+    
+	<atom:link href="https://live4thee.github.io/tags/life/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A Trip to An-Ji</title>
+      <link>https://live4thee.github.io/posts/2019-03-17-a-trip-to-an-ji/</link>
+      <pubDate>Sun, 17 Mar 2019 21:56:46 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/posts/2019-03-17-a-trip-to-an-ji/</guid>
+      <description>周末去了趟安吉。 周六下午两点到。休息了一会儿后去爬山，一路都是茶园。还没爬几步，就气喘 吁吁、汗流颊背。两旁偶尔盛开着山鸡椒娇嫩的黄花、以及散</description>
+    </item>
+    
+    <item>
+      <title>25 Days</title>
+      <link>https://live4thee.github.io/posts/2019-01-13-25-days/</link>
+      <pubDate>Sun, 13 Jan 2019 22:54:50 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/posts/2019-01-13-25-days/</guid>
+      <description>母亲今天出院了，等电梯的时候刚好是最近两周来魔都难得露出阳光的那一刻。 这些天在医院陪同的时候，写了一些日记，也正好有时间看一些书。有讲人生的</description>
+    </item>
+    
+  </channel>
+</rss>

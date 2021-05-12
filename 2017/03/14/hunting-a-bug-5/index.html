@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Hunting a Bug (5) &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Hunting a Bug (5)
+                    </h1>
+                    <h2 class="headline">
+                    Mar 14, 2017 00:00
+                    · 944 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/zstack">zstack</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>最近研究 <code>zstack</code><sup class="footnote-ref" id="fnref:zs"><a href="#fn:zs">1</a></sup> 中一个比较诡异的
+<a href="https://github.com/zstackio/issues/issues/2013">bug</a>，现象是：并发创
+建大量虚拟机的时候，<code>kvmagent</code> 偶尔会报告 <code>iptables</code> 操作失败，最终导
+致少数虚拟机创建失败。</p>
+<pre><code>Another app is currently holding the xtables lock. Perhaps you want to use the -w option?</code></pre>
+<h2 id="第一次尝试">第一次尝试</h2>
+
+<p>显然，系统出错的那一刻 <code>iptables</code> 有多个运行实例。在 <code>kvmagent</code> 的代码
+中寻找所有对 <code>iptables</code> 的操做，果然有几条漏网之鱼没有被锁同步。高高兴
+兴地提交了一个
+<a href="https://github.com/zstackio/zstack-utility/pull/178">PR</a>，同事部署了
+一个环境，没有重现。哈！</p>
+
+<h2 id="第二次尝试">第二次尝试</h2>
+
+<p>然而另外一个同事后来发现该问题还是会重现。重新研究了一下日志，发现报错
+记录中以上错误都是 <em>相同时间戳两两成对出现</em> - 我不禁开始怀疑现有的锁机
+制是否有问题。</p>
+
+<ol>
+<li>单独写了测试程序，没有发现锁机制的行为异常；</li>
+<li>研究了锁机制的逻辑：</li>
+<li><code>threading.RLock</code> 保证不同线程不能同时获得锁；</li>
+<li><code>fcntl.lockf</code> 保证不同的进程不能同时获得锁。</li>
+</ol>
+
+<p><code>RLock</code> 是可重入锁，但不是重点，两个线程不能同时获得锁；<code>RLock</code> 的
+<code>get_ident()</code> 得到的线程标识可能会被 recycle，但是一个进程内的活动线程
+标识至少都是唯一标识的。所以，两个线程不能同时获得锁！锁机制不可能出问
+题。</p>
+
+<h2 id="重新分析日志">重新分析日志</h2>
+
+<p>明显，从锁机制入手已经进入了死胡同。重新分析一下相同时间戳报出来的出错
+日志，发现了一个令人惊讶的事情：出错信息对应的消息 ID 竟然是一模一样的！
+难道，同一个消息被处理了两次，又刚巧同时返回？这明显不可能（除非消息总
+线代码有 bug）。核心代码已经千锤百炼，不会有这种低级错误。</p>
+
+<p>然而很快便找到原因 - 对日志进行分析的分析的时候，做了多次 <code>grep</code>:</p>
+<pre><code>$ find . -type f -name \*.log | xargs grep &#39;...&#39; &gt; result.log
+# similar commands repeated</code></pre>
+<p>第二次 <code>grep</code> 的时候会包含 <code>result.log</code> 里面的结果。真想扇自己一个耳光。
+好消息是，重新过滤了一遍以后发现：*出错的时间戳都是不一样的*。那么剩下
+一个问题：当时会有哪个组件在操纵 <code>iptables</code> 呢？而且绝不是 <code>zstack</code>。</p>
+
+<h2 id="libvirt">libvirt</h2>
+
+<p>头号疑犯是 <code>libvirt</code>。于是在 <code>libvirt</code> 的代码库中做了一次 <code>git grep</code>，
+果不其然！比如，打开 <code>anti-spoofing</code> 的时候，<code>libvirt</code> 就会设置相应的
+防火墙规则。<code>libvirt</code> 会尽可能的使用 <code>iptables -w</code>，但是 <code>libvirt</code> 并
+不是 <code>iptables</code> 的唯一操纵者。后来问了一下同事，能重现的环境果然是打开
+了 <code>anti-spoofing</code> 的。又回到和同事经常一起报怨的问题：<em>Unix/Linux 很
+多命令行工具都不是设计作为被“编程”使用的</em> - 体现在：</p>
+
+<ol>
+<li>配置接口不方便；</li>
+<li>多数默认不支持并发；</li>
+<li>默认参数配置有待商榷，比如：</li>
+<li><code>iptable</code> 默认没有 <code>-w</code>，当然，这个选项是后来加上的。</li>
+<li>同理，<code>ebtables</code> 的 <code>--concurrent</code> 选项。</li>
+</ol>
+<div class="footnotes">
+
+<hr />
+
+<ol>
+<li id="fn:zs">ZStack, <a href="http://zstack.org">http://zstack.org</a>
+ <a class="footnote-return" href="#fnref:zs"><sup>[return]</sup></a></li>
+</ol>
+</div>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

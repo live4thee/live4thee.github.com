@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Surface Pro 4 &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Surface Pro 4
+                    </h1>
+                    <h2 class="headline">
+                    Feb 25, 2017 00:00
+                    · 1023 words
+                    · 3 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/windows">Windows</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>为了比较方便高效地看文档（主要是PDF）、记笔记，平衡了诸般选择后，买了
+一台 <code>Surface Pro 4</code>。最低配的版本，但是手写笔套装。用了两三个礼拜后，
+还是忍不住又买了官方键盘。总共耗资 5k 多，至少要看几百本书才能回本。刚
+拆箱上电的时候，有两次触摸屏没有反应。刚好老婆微信问效果怎么样（因为老
+婆身边同事偏差评的多），一身冷汗。还好，更新了系统后没出一点幺蛾子。</p>
+
+<p>脑子一抽筋，想尝试用 <code>Markdown</code> 来写格式化文档，因为 <code>Windows</code> 下我没
+有 <code>Office</code> 软件。在 <code>Linux</code> 下，我是用 <code>Emacs orgmode</code>，可以输出各种
+格式，尤其是表格、公式的输入体验，要甩开主流 <code>Markdown</code> 编辑器几条街。</p>
+
+<h2 id="字体">字体</h2>
+
+<p>在同事的建议下，配置了一个苹果上面比较流行的苹芳字体。中文显示效果不错，
+但是英文不是等宽，作为码农，很不习惯。还有一个 <code>Windows</code> 下的 <code>YaHei
+Consolas Hybrid</code>，第一个中文字符的显示总是有点奇怪，有点下沉的感觉。</p>
+
+<h2 id="编辑器">编辑器</h2>
+
+<p>对比了 <code>Atom</code> 和 <code>vscode</code> 后，选择了后者。选择了如下插件：</p>
+
+<ol>
+<li>Markdown PDF - 自动导出 PDF，支持中文</li>
+<li>Markdown TOC - 为 <code>Markdown</code> 生成目录</li>
+<li>vscode-pandoc - pandoc 接口</li>
+</ol>
+
+<p>最终只保留了 <code>vscode-pandoc</code>。</p>
+
+<h3 id="markdown-pdf">Markdown PDF</h3>
+
+<p>依赖 <code>phantomjs</code> 且 Windows 下需要自己下一个并配置好。输出的格式比较糟
+糕（或许可以通过调整样式配置来解决）。</p>
+
+<h3 id="markdown-toc">Markdown TOC</h3>
+
+<p>最终输出的目录没有页码，而且输出为PDF格式后的样式也很糟糕。</p>
+
+<h3 id="vscode-pandoc">vscode-pandoc</h3>
+
+<p>需要装一个 <code>pandoc</code>，而 <code>pandoc</code> 输出 PDF 依赖 <code>LaTeX</code>，于是我又装了一
+个 <code>MikTeX</code>。但是输出的 PDF 效果很赞。因为 <code>LaTeX</code> 的中文支持不给力，
+于是给 <code>vscode-pandoc</code> 配置了如下参数:</p>
+
+<blockquote>
+<p>&ndash;latex-engine=xelatex -V mainfont=&ldquo;PingFang SC&rdquo; &ndash;toc -s -S -N</p>
+</blockquote>
+
+<p>生成出来的 PDF 自动带有目录，章节有序号，正合我意思。如果是想写幻灯片，
+用 <code>-t beamer</code> 就好。而且因为装了 <code>MikTeX</code>，其中自带的 <code>TeXworks</code> 里面
+有很多模板可选，实在不行可以直接写 <code>LaTeX</code> 文稿。用<code>TeX</code>类系统还有一个
+好处，就是中文换行的在最终 <code>PDF</code> 文件里面会被处理掉，<code>Markdown</code> 本身的
+文字可以换行，而不用担心输出内容中间会被插入空格之类。基于 <code>phantomjs</code>
+类的解决方案应该都会有这个问题。</p>
+
+<h2 id="so-why">So Why?</h2>
+
+<p>那么当初为啥买苏菲婆？基本上，码字、或者用Lisp/ML家族的语言，我喜欢用
+<code>Emacs</code>，码C语言家族的代码我喜欢用<code>Vim</code>。中英文混杂的时候频繁切换输入
+法用 <code>Vim</code> 很不方便，而且<code>orgmode</code> 实在是太方便了。但是 Windows 下用
+<code>Vim</code> 或者 <code>Emacs</code> 天生就像瘸了半条腿，因为缺少各种 Shell命令的辅助。
+Windows 比较方便的地方在于 <code>OneNote</code> 笔记，<code>OneDrive</code>同步。在手写笔支
+持方面，有三个免费应用程序比较酷：</p>
+
+<ol>
+<li>OneNote - 无需多言</li>
+<li>Xodo - PDF Reader and Editor</li>
+<li>Nebo - the best way to take notes</li>
+</ol>
+
+<p>网上推荐最多的是 <code>Drawboard PDF</code>，不过 <code>Xodo</code> 似乎也够用了。<code>Nebo</code> 之
+前收费，现在免费了。设计有很多 <code>Pen Gesture</code>，很有意思。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

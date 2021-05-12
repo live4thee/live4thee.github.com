@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>KDE Notes &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        KDE Notes
+                    </h1>
+                    <h2 class="headline">
+                    May 31, 2016 00:00
+                    · 865 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/kde">kde</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>为了 <a href="https://okular.kde.org/">Okular</a>，把系统从 <em>xfce</em> 切换到了 *kde*。
+以下是遇到的各种问题，以及解决办法。</p>
+
+<h2 id="konsole">Konsole</h2>
+
+<p>KDE 默认的终端模拟器 Konsole 只能支持很少一部分字体，很不幸的是，其中
+不包括中文字体。因此，Konsole 中混杂中英文的时候就很难看 - 中文下沉，
+英文上浮。换用了 <code>urxvt</code>，配上 <code>Monaco</code> 字体和文泉驿等宽正黑，很棒。</p>
+
+<h2 id="中文输入">中文输入</h2>
+
+<p>中文输入用了 <code>ibus</code>，要注意的是非 Qt 程序，如 GTK 等，其输入模块设为了
+<code>xim</code>，如下。否则 <code>firefox</code> 里面输入法不起作用。</p>
+<pre><code>CLUTTER_IM_MODULE=xim
+GTK_IM_MODULE=xim</code></pre>
+<h2 id="urxvt">URxvt</h2>
+
+<p>美化的设置网上有很多，对我比较重要的是 <code>.Xdefaults</code> 中的如下置：</p>
+<pre><code>URxvt.perl-ext-common: default,matcher,selection-to-clipboard
+URxvt.url-launcher:    /usr/bin/firefox
+URxvt.matcher.button:  3</code></pre>
+<p>它使得 <code>URxvt</code> 可以识别链接，鼠标右键点击直接用 <code>firefox</code> 打开。此外，
+设置了 <code>URxvt</code> 的粘贴板 (基于X11) 和 KDE 的同步。另外，<code>URxvt</code> 在 KDE
+下全屏的时候，边沿会有空隙。鼠标右击 <code>URxvt</code> 窗口的标题，<code>More
+Actions</code> -&gt; <code>Special Application Settings</code> -&gt; <code>Obey geometry
+restrictions</code> 设为 <code>False</code>, <code>No</code> 即可。</p>
+
+<h3 id="效果图">效果图</h3>
+
+<p><img src="/media/urxvt.png" alt="urxvt" /></p>
+
+<h2 id="耳机没有声音">耳机没有声音</h2>
+
+<p>只发生了一次，不知道是不是偶然，重新初始化了 <code>alsa</code> 就好了。</p>
+<pre><code>$ alsactl init</code></pre>
+<h2 id="多屏幕">多屏幕</h2>
+
+<p>KDE 的多屏设置没有关闭某个显示器，只保留主显示的选项（选中某个显示器然
+后取消 <code>enable</code> 也不管用），但是可以直接用 <code>xrandr</code>。比如，我的笔记本
+是显示器在 <code>xrandr</code> 的输出标示是<code>eDP1</code>，则：</p>
+<pre><code>$ xrandr --output eDP1 --off</code></pre>
+<p>重新打开：</p>
+<pre><code>$ xrandr --output eDP1 --auto</code></pre>
+<p>而且，令我惊讶的是，一旦关闭了笔记本显示器。重新启动后，如果接着外接显
+示器，笔记本会自动关闭。之前，<code>xfce/lightdm</code> 锁屏幕后，如果设置了只在
+外接显示器显示，解锁后外接显示器没有输入，需要重新设置显示模式。
+<code>kde/sddm</code> 没有这个问题。</p>
+
+<h2 id="libreoffice-tooltips-没有文字">LibreOffice Tooltips 没有文字</h2>
+
+<p>其实是有文字的，不过文字和背景色一样，所以看起来像空的。<code>Colors</code> -&gt;
+<code>Options</code> -&gt; 取消 <code>Apply colors to non-Qt application</code>。</p>
+
+<h2 id="touchpad">Touchpad</h2>
+
+<p>如果习惯 Mac 那样的 Natural Scroll，可以用 <code>xinput</code> 来实现：</p>
+<pre><code>$ xinput --set-button-map &#34;DLL0704:01 06CB:76AE Touchpad&#34; 1 2 3 5 4</code></pre>
+<p>其中，<code>DLL0704</code> 那一串是 Touchpad 的标示符，也可以直接用 ID，但因为是
+USB 设备，所以很可能重启后，这个 ID 会变，直接用标识符比较健壮。其中，
+1/2/3 分别表示鼠标左、中、右键，而 <sup>4</sup>&frasl;<sub>5</sub> 表示上/下滚动。</p>
+
+<h2 id="systemd-的问题-和-kde-无关">Systemd 的问题 (和 KDE 无关)</h2>
+
+<p>有时候，关机的时候，会报错类似 <code>A stop job is running for Session c2
+for user...</code>，<a href="https://github.com/systemd/systemd/issues/1615">这里</a>以
+及<a href="https://github.com/systemd/systemd/issues/2691">这里</a> 是该问题的讨
+论。我的临时处理方案是把默认的超时从90秒改成了10秒。</p>
+<pre><code># /etc/systemd/system.conf
+DefaultTimeoutStartSec=10s
+DefaultTimeoutStopSec=10s</code></pre>
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

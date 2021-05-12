@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sport on Life as a Programmer</title>
+    <link>https://live4thee.github.io/tags/sport/</link>
+    <description>Recent content in sport on Life as a Programmer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 06 Nov 2018 10:08:07 +0800</lastBuildDate>
+    
+	<atom:link href="https://live4thee.github.io/tags/sport/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Running Again!</title>
+      <link>https://live4thee.github.io/posts/2018-11-06-running-again/</link>
+      <pubDate>Tue, 06 Nov 2018 10:08:07 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/posts/2018-11-06-running-again/</guid>
+      <description>自从恢复跑步一个月来，总共跑了 32 公里，每周一到二次。运动量算是一般， 尤其看了自己的每公里配速、以及 VO2 Max 等数据后，惊觉再不动身就凉了。 断断续续</description>
+    </item>
+    
+  </channel>
+</rss>

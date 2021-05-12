@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Hunting a Bug &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Hunting a Bug
+                    </h1>
+                    <h2 class="headline">
+                    Sep 17, 2015 00:00
+                    · 869 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/azure">Azure</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>这两天在追踪一个非常不可思议的bug - 我们的系统里会定时收到报警邮件说：
+数据表是空的。而且，这个报警的内容和条件都是我设定的。</p>
+
+<p>我的算法逻辑很简单，根据数据表的内容做相应的事情，而数据表为空是个极端
+情况。系统分为生产环境和测试环境，我事先分别向两个环境中的数据表注入了
+数据。因此，收到这种警报意味着可能代码实现有错误。其中有个重要的细节：
+生产环境只是开启的时候有少量报警，然后就没有了。而测试环境确实一直在报
+警，甚至连报警的间隔时间也和我在算法里面的设置非常一致。</p>
+
+<p>重复看了多遍代码，结论只有一个：这绝对不可能发生。逻辑验证了很多遍，无
+论异常路径怎么走，理论上都不可能发生。而事实放在眼前，于是只能老僧入定
+般冥思苦想。竞争？死锁？某个API没有用对？</p>
+
+<p>同时还要帮助PM进行一些客户支持。还好用git，本地专门有个分支。</p>
+
+<p>中间发现、又填了一些坑。每发现一个就增加一份不自信，每减少一个坑却又增
+加了寻找一个可以解释这个现象的理由的难度。直到今天下午，为了防止远程环
+境干扰本地调试，我把测试环境里部署好的服务删掉了。然而，不可思议的是：
+报警邮件还是以之前那个节奏发送。仿佛幽灵一般。天生异象，必有妖孽。</p>
+
+<p>重新检查日志。发现了另一个至关重要的细节：定期报警中的一个ID和刚部署上
+去的ID不一致（为了方便诊断，我为不同节点上跑的对等的单例生成了一个ID）。
+这意味着，一直报警的线程并非新部署上去的服务导致。顺着这个思路抽丝剥茧，
+终于发现，之前这个神秘的报警是另外一个端对端测试造成的。我们会在服务上
+线之前，专门在这个环境下做端对端测试。我没有意识到同事这几天为了上线，
+做了端对端测试，而且端对端测试环境中的那张表，确实是空的。这也解释了为
+何生产环境后来没有报错，因为生产环境中我是部署后注入数据的。而测试环境
+中，其实一直没有报错。</p>
+
+<p>真相大白。有点像央视《走进科学》那样无厘头。然而复杂环境下的调试真的需
+要丰富的专业知识和福尔摩斯般的推理能力。为了这个问题，自己常常念念有词
+<code>think out of the box</code>。中午和同事聊前东家的黑科技，聊非确定性芯片，聊
+Mill CPU。看起来，奏效了。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

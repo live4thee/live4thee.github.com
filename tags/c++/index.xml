@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>c&#43;&#43; on Life as a Programmer</title>
+    <link>https://live4thee.github.io/tags/c&#43;&#43;/</link>
+    <description>Recent content in c&#43;&#43; on Life as a Programmer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 18 Oct 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://live4thee.github.io/tags/c++/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Modern C&#43;&#43;</title>
+      <link>https://live4thee.github.io/2016/10/18/modern-cpp/</link>
+      <pubDate>Tue, 18 Oct 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://live4thee.github.io/2016/10/18/modern-cpp/</guid>
+      <description>一点笔记，来自 Modern C++ 最重要的一点：*不要直接用指针*。因为它直接暴露了内存区域，且不能传达出 所有者相关语义。Pointers must NOT own resources. 以下是一些</description>
+    </item>
+    
+  </channel>
+</rss>

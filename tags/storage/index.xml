@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>storage on Life as a Programmer</title>
+    <link>https://live4thee.github.io/tags/storage/</link>
+    <description>Recent content in storage on Life as a Programmer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 30 Apr 2021 16:00:55 +0800</lastBuildDate>
+    
+	<atom:link href="https://live4thee.github.io/tags/storage/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Processes in D State</title>
+      <link>https://live4thee.github.io/posts/2021-04-30-processes-in-d-state/</link>
+      <pubDate>Fri, 30 Apr 2021 16:00:55 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/posts/2021-04-30-processes-in-d-state/</guid>
+      <description>当进程陷入不可中断睡眠的时候，用户没有办法杀掉它。如果该进程进入了僵尸 状态、且有很多子进程的话那就更是“屋漏偏逢连夜雨”了。绝大部分情况下，</description>
+    </item>
+    
+    <item>
+      <title>DRBD Split-Brain</title>
+      <link>https://live4thee.github.io/2017/06/30/drbd-split-brain/</link>
+      <pubDate>Fri, 30 Jun 2017 20:40:31 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/2017/06/30/drbd-split-brain/</guid>
+      <description>上午正在聚精会神写代码的时候，QA团队的同事说，一个测试环境的DRBD集群貌 似出了问题，数据不一致。心里一个惊，真是怕啥来啥。一边疑惑着“不</description>
+    </item>
+    
+    <item>
+      <title>Demo after Staying Late</title>
+      <link>https://live4thee.github.io/2017/05/15/demo-after-staying-late/</link>
+      <pubDate>Mon, 15 May 2017 21:03:52 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/2017/05/15/demo-after-staying-late/</guid>
+      <description>此前立下军令状，两个礼拜出demo，今天终于赶上。然而demo的时候出了意想不 到的问题：虚拟机启动后很快就自动关机了。后来demo结束后修复</description>
+    </item>
+    
+    <item>
+      <title>DRBD Notes (2)</title>
+      <link>https://live4thee.github.io/2017/04/01/drbd-notes-2/</link>
+      <pubDate>Sat, 01 Apr 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://live4thee.github.io/2017/04/01/drbd-notes-2/</guid>
+      <description>DRBD 9 出了一个套件，叫 drbdmanage，提供了配置分发、re-balancing 等功能。由于依赖存放在 Sourceforge 的 DocBook 样式文件，编译生成 rpm 包的整个过</description>
+    </item>
+    
+    <item>
+      <title>DRBD Notes (1)</title>
+      <link>https://live4thee.github.io/2017/03/31/drbd-notes-1/</link>
+      <pubDate>Fri, 31 Mar 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://live4thee.github.io/2017/03/31/drbd-notes-1/</guid>
+      <description>最近开始接触 DRBD，具体来说，DRDB 9 - 这 是一个 CentOS 7.2 还没有第三方 rpm 的版本，也就是说要自己编译。呵 呵，C, Makefile, autotools, Kernel Module，十年前就磨练</description>
+    </item>
+    
+  </channel>
+</rss>

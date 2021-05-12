@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>A Few Tips &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        A Few Tips
+                    </h1>
+                    <h2 class="headline">
+                    Apr 1, 2016 00:00
+                    · 490 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/golang">golang</a>
+                          
+                              <a href="https://live4thee.github.io/tags/orgmode">orgmode</a>
+                          
+                              <a href="https://live4thee.github.io/tags/vim">vim</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<h1 id="godef-不能定位到系统函数源代码">&lsquo;godef&rsquo; 不能定位到系统函数源代码</h1>
+
+<p><code>godef</code> 突然不能定位到 golang 自己的源代码。研究了一下，我的机器里装有
+<code>golang-src</code> 和 <code>golang-1.6-src</code>，其中 <code>golang-src</code> 包内并没有任何符号
+链接。折腾了一下，<code>export GOROOT=/usr/lib/go-1.6</code>搞定。</p>
+
+<h1 id="org-mode-eww">org-mode + eww</h1>
+
+<p>用 org-mode 写文档很方便，但是由于输出的 HTML 配色受 <code>font-face</code> 影响，
+如果 emacs 运行在 <code>tmux</code> 里面，输出的色调会很难看。<code>xfce4-terminal</code>下
+的 org-export 的输出则好看得多。另外，<code>auto-fill</code> 文字自动段行后，右边
+一大块空白，刚好分屏，运行一个 <code>eww</code>，即时显示输出 HTML 后的内容。推荐
+使用 <a href="https://github.com/lujun9972/org-eww">org-eww</a>。</p>
+
+<h1 id="vim-插件">vim 插件</h1>
+
+<p><a href="https://github.com/majutsushi/tagbar">tagbar</a> 还不错。</p>
+
+<h1 id="制作-freedos-usb-启动盘">制作 FreeDOS USB 启动盘</h1>
+
+<p>笔记本的 BIOS 有点老了，犯强迫症。官方只有 EXE 的更新，用 Linux 没法直
+接更新 BIOS。找到一个古老的 32 MB 优盘，刚好用来制作 FreeDOS 启动优盘。</p>
+<pre><code>#!/bin/bash
+
+# Creating a FreeDOS bootable USB stick to upgrade BIOS
+#
+# usage: mk-freedos-usb.sh /dev/sdX
+# &#39;sdX&#39; is the device of the USB device (dmesg | tail)
+#
+# Guide from:
+# https://feeding.cloud.geek.nz/posts/creating-freedos-bootable-usb-stick-to/
+#
+# Li, Qun &lt;live4thee@gmail.com&gt;
+
+set -e
+
+test $# -eq 1 || echo &#34;usage: $(basename &#34;$0&#34;) /dev/sdX&#34; &amp;&amp; exit 1
+
+device=&#34;$1&#34;
+
+sudo apt-get install -y makebootfat syslinux
+
+TMP=`mktemp -d -t make-freedos-usb.sh.XXXXXX`
+trap &#34;rm -rf $TMP* 2&gt;/dev/null&#34; 0
+
+FSROOT=$TMP/fs-root
+mkdir -p $FSROOT
+
+cd $TMP
+
+wget http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.0/pkgs/commandx.zip
+wget http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.0/pkgs/kernels.zip
+wget http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.0/pkgs/substx.zip
+wget http://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/distributions/1.0/pkgs/unstablx.zip
+
+for ZIP in *.zip; do unzip $ZIP; done
+
+cp ./source/ukernel/boot/fat16.bin  .
+cp ./source/ukernel/boot/fat12.bin .
+cp ./source/ukernel/boot/fat32lba.bin .
+
+cp /usr/lib/SYSLINUX/mbr.bin .
+
+cp ./bin/command.com $FSROOT
+cp ./bin/kernel.sys  $FSROOT
+
+sudo /usr/bin/makebootfat -o &#34;$device&#34; \
+     -E 255 -1 fat12.bin -2 fat16.bin -3 fat32lba.bin -m mbr.bin $FSROOT
+
+exit 0</code></pre>
+<p>从老优盘里面翻出几本经典电子书：</p>
+
+<ul>
+<li>Advanced Linux Programming</li>
+<li>The Linux Programmer&rsquo;s Toolbox</li>
+<li>The Linux Development Platform</li>
+</ul>
+
+<p>还有 CMU/CS/15-213 的课件。唉！</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

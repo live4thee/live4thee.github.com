@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>DRBD Notes (1) &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        DRBD Notes (1)
+                    </h1>
+                    <h2 class="headline">
+                    Mar 31, 2017 00:00
+                    · 758 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/storage">storage</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>最近开始接触 <a href="http://docs.linbit.com/">DRBD</a>，具体来说，<code>DRDB 9</code> - 这
+是一个 <code>CentOS 7.2</code> 还没有第三方 <code>rpm</code> 的版本，也就是说要自己编译。呵
+呵，<code>C</code>, <code>Makefile</code>, <code>autotools</code>, <code>Kernel Module</code>，十年前就磨练过的技
+能。</p>
+
+<h2 id="编译环境">编译环境</h2>
+
+<p>为了加快时间，充分利用本机 <code>SSD</code>，本地装了一个 <code>CentOS 7.2</code> 的系统。</p>
+<pre><code>yum install kernel-devel rpm-build gcc
+curl -O http://oss.linbit.com/drbd/9.0/drbd-9.0.1-1.tar.gz</code></pre>
+<p>然后注意到安装的 <code>kernel-devel</code> 是版本 <code>3.10.0-514</code>，而不是已有的
+<code>3.10.0-327</code>。出于谨慎，重新启动，保证 <code>uname -r</code> 和 <code>kernel-devel</code> 的
+版本是一致的。</p>
+
+<h2 id="西湖的水">西湖的水</h2>
+
+<p>我的泪！然后就开始了折腾。</p>
+
+<h3 id="make-kmp-rpm-报错"><code>make kmp-rpm</code> 报错</h3>
+<pre><code>In file included from /root/rpmbuild/BUILD/drbd-9.0.1-1/obj/default/drbd_int.h:50:0,
+                 from /root/rpmbuild/BUILD/drbd-9.0.1-1/obj/default/drbd_bitmap.c:35:
+/root/rpmbuild/BUILD/drbd-9.0.1-1/obj/default/drbd-kernel-compat/drbd_wrappers.h:1516:8: error: redefinition of &#39;struct ib_cq_init_attr&#39;
+ struct ib_cq_init_attr {
+        ^</code></pre>
+<p>心里一凉。研究了一下，改了点代码成功绕过。后来发现 <code>OpenSuSE</code> 也有一个几乎一
+样的<a href="https://build.opensuse.org/package/view_file/openSUSE:Factory/drbd/kernel-4.5-compat.patch?rev=52">补丁</a>。
+叹了口气，又多了点信心 - 就像长途奔袭后终于找到组织。</p>
+
+<h3 id="安装-kmod-drbd-失败">安装 <code>kmod-drbd</code> 失败</h3>
+
+<p>还没来得及高兴，就得到一个安装失败：</p>
+<pre><code># rpm -i rpmbuild/RPMS/x86_64/kmod-drbd-9.0.1_3.10.0_514.10.2-1.el7.centos.x86_64.rpm
+error: Failed dependencies:
+        ksym(kfree_skb) = 0x195c9f2c is needed by kmod-drbd-9.0.1_3.10.0_514.10.2-1.el7.centos.x86_64
+        ksym(nla_put_nohdr) = 0x1ca25ace is needed by kmod-drbd-9.0.1_3.10.0_514.10.2-1.el7.centos.x86_64
+        ksym(__vmalloc) = 0xa9bd2676 is needed by kmod-drbd-9.0.1_3.10.0_514.10.2-1.el7.centos.x86_64</code></pre>
+<p>加载内核模块
+<a href="http://lxr.free-electrons.com/source/Documentation/kbuild/modules.txt?v=3.8;a=arm#L438">CRC</a>
+<a href="https://www.ibm.com/developerworks/cn/linux/l-cn-kernelmodules/">校验</a>
+失败！</p>
+
+<blockquote>
+<p>Module versioning is enabled by the CONFIG_MODVERSIONS tag, and is
+used as a simple ABI consistency check. A CRC value of the full
+prototype for an exported symbol is created. When a module is
+loaded/used, the CRC values contained in the kernel are compared
+with similar values in the module; if they are not equal, the kernel
+refuses to load the module as it indicates that the module is built
+with reference to a different version of the Linux kernel source.</p>
+</blockquote>
+
+<p>搜索发现 <code>RedHat bugzilla</code> 的
+<a href="https://bugzilla.redhat.com/show_bug.cgi?id=767738">bug 767738</a>，看起
+来也是一样的问题。但那是 <code>RHEL 6.2</code>，而我现在是 <code>CentOS 7.2</code>，相隔将近
+5 年，理论上来说，早就该修复了。</p>
+
+<h2 id="重建环境">重建环境</h2>
+
+<p>用 <code>CentOS 7.2 DVD</code> 重建了一个纯 7.2 环境：</p>
+<pre><code>mkdir /media/CentOS
+mount /dev/cdrom /media/CentOS
+yum --disablerepo=* --enablerepo=c7-media install gcc kernel-devel</code></pre>
+<p>然后重新走了以上步骤。几乎吐血：</p>
+
+<ol>
+<li><code>make kmp-rpm</code> 不再有 <code>ib_cq_init_attr</code> 重复定义的报错；</li>
+<li>编译出来的 rpm 包顺利安装没毛病！</li>
+</ol>
+
+<p>接下来编译
+<a href="http://oss.linbit.com/drbd/drbd-utils-8.9.6.tar.gz">drdb-utils</a>，过程
+中除了 <code>xsltproc</code> 很慢之外也没啥好说的，一切顺利。然而安装的时候暴露出
+本来面目：</p>
+<pre><code># rpm -i rpmbuild/RPMS/x86_64/drbd-utils-8.9.6-1.el7.centos.x86_64.rpm
+        file /usr/sbin/drbdadm conflicts between attempted installs of drbd-utils-8.9.6-1.el7.centos.x86_64 and drbd-utils-8.9.6-1.el7.centos.x86_64
+        file /usr/sbin/drbdmeta conflicts between attempted installs of drbd-utils-8.9.6-1.el7.centos.x86_64 and drbd-utils-8.9.6-1.el7.centos.x86_64
+        file /usr/sbin/drbdsetup conflicts between attempted installs of drbd-utils-8.9.6-1.el7.centos.x86_64 and drbd-utils-8.9.6-1.el7.centos.x86_64</code></pre>
+<p>还好在 <code>drdb-user</code> 邮件列表中，维护者之一 Lars 给出了
+<a href="https://lists.gt.net/drbd/users/27292">答案</a>。解决办法就是修改
+<code>drbd.spec.in</code>：</p>
+<pre><code>--- a/drbd.spec.in
++++ b/drbd.spec.in
+@@ -31,6 +31,7 @@
+ # conditionals may not contain &#34;-&#34; nor &#34;_&#34;, hence &#34;bashcompletion&#34;
+ %bcond_without bashcompletion
+ %bcond_without sbinsymlinks
++%undefine with_sbinsymlinks
+ # --with xen is ignored on any non-x86 architecture
+ %bcond_without xen
+ %bcond_without 83support</code></pre>
+<p>有的
+<a href="https://www.server-world.info/en/note?os=CentOS_7&amp;p=drbd">教程</a>会直接
+告诉你怎么改，但是没有像 Lars 一样解释原因。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

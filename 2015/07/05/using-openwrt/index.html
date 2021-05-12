@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Using OpenWrt &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Using OpenWrt
+                    </h1>
+                    <h2 class="headline">
+                    Jul 5, 2015 00:00
+                    · 574 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/networking">networking</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    <p>之前做路由器方面的工作的时候，老大给我发来了两款还算比较强劲的路由器。
+其中一款当时OpenWrt还没有正式支持，自己尝试编译了DD-Wrt和OpenWrt的代码，
+但编出来的镜像都不能工作。后来从DD-Wrt站点下载了预编译镜像，倒是跑的很
+好。另一款，性能弱一点，OpenWrt支持的很好，编译、刷机，一下搞定。</p>
+
+<p>我得说，DD-Wrt的编译系统对于开发者非常不友好，而OpenWrt简直就是福音。
+它的整个源代码的组织、编译、补丁都非常干净，正是我理想中的组织系统方式
+（基于Makefile - 有点类似BSD的Ports系统）。其编译系统的呈现和编译Linux
+内核几乎一样。很酷。</p>
+
+<p>这周on-call，晚上连公司的网络经常超时，便想把自己那个老旧的TP-Link换成
+很久之前刷了OpenWrt的路由器。当时编译镜像的时候除了基本的工具，啥都没
+选，因此配置工作只能通过SSH登录后，命令行操作。这也正是我所希望的，没
+有WebUI，因此不需要跑个Web服务器 - 况且大部分时候，我们也不需要它。</p>
+
+<p>路由器接着电信的机顶盒，稍微配置一下就行了：</p>
+<pre><code>uci set network.wan.proto=dhcp // WAN口从机顶盒获取IP
+
+uci set wireless.@wifi-device[0].disabled=0
+uci set wireless.@wifi-device[0].txpower=17
+uci set wireless.@wifi-device[0].channel=6
+uci set wireless.@wifi-iface[0].mode=ap
+uci set wireless.@wifi-iface[0].ssid=[无线SSID]
+uci set wireless.@wifi-iface[0].network=lan
+uci set wireless.@wifi-iface[0].encryption=psk2
+uci set wireless.@wifi-iface[0].key=[无线密码]
+
+uci commit
+/etc/init.d/network restart</code></pre>
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

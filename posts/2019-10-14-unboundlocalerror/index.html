@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>UnboundLocalError &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        UnboundLocalError
+                    </h1>
+                    <h2 class="headline">
+                    Oct 14, 2019 09:36
+                    · 242 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/python">python</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>最近碰到个 &lsquo;UnboundLocalError&rsquo;, 初看不可思议，知道原理后就释然了。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e"># file: test.py</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">e</span>(x): <span style="color:#66d9ef">print</span>(x)
+
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">g</span>():
+    e(<span style="color:#ae81ff">1</span>)
+    e <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+
+g()</code></pre></div>
+<p>运行一下：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ python test.py
+Traceback <span style="color:#f92672">(</span>most recent call last<span style="color:#f92672">)</span>:
+  File <span style="color:#e6db74">&#34;test.py&#34;</span>, line 7, in &lt;module&gt;
+    g<span style="color:#f92672">()</span>
+  File <span style="color:#e6db74">&#34;test.py&#34;</span>, line 4, in g
+    e<span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>
+UnboundLocalError: local variable <span style="color:#e6db74">&#39;e&#39;</span> referenced before assignment</code></pre></div>
+<p>这里的问题在于那一行 &lsquo;e = 1&rsquo;. 有了这一行，Python 就认为 &lsquo;e&rsquo; 是函数 &lsquo;g&rsquo;
+的本地变量（因为没有在 &lsquo;g&rsquo; 里面写 &lsquo;global e&rsquo;），这就导致了调用 &lsquo;e(1)&rsquo;
+的报错 - 因为这时候变量 &lsquo;e&rsquo; 在函数 &lsquo;g&rsquo; 内尚未绑定任何值。</p>
+
+<h2 id="python-的变量作用域规则">Python 的变量作用域规则</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">In python all the variables inside a function are global if they are
+not assigned any value to them. That means if a variable is only
+referenced inside a function, it is global. However if we assign any
+value to a variable inside a function, its scope becomes local to that
+unless explicitly declared global.</code></pre></div>
+<p>更多例子，参考：<a href="https://stackoverflow.com/questions/291978/short-description-of-the-scoping-rules">Python Scoping Rules</a></p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

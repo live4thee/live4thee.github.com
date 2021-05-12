@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>.Net Core on Linux &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        .Net Core on Linux
+                    </h1>
+                    <h2 class="headline">
+                    Jan 27, 2021 22:22
+                    · 540 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/.net">.Net</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>因为要学 <a href="https://microsoft.github.io/coyote/">coyote</a>，又不想用
+Windows，于是在本机 Xubuntu 20.04 上装了一个 .Net Core，没想到体验还挺
+不错。我在 Fedora 33 以及 Windows 2012 R2 虚拟机里测试了也可以，主力环
+境还是 Xubuntu 20.04.</p>
+
+<h3 id="安装源">安装源</h3>
+
+<p>步骤来自<a href="https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux">官网</a>：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh"><span style="color:#75715e"># Download the Microsoft repository GPG keys</span>
+$ wget -q https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+<span style="color:#75715e"># Register the Microsoft repository GPG keys</span>
+$ sudo dpkg -i packages-microsoft-prod.deb
+<span style="color:#75715e"># Update the list of products</span>
+$ sudo apt-get update
+$ sudo apt-get install dotnet-host dotnet-runtime-5.0 dotnet-sdk-5.0</code></pre></div>
+<p>注意：纯用 .Net Core 并不需要安装 <code>powershell</code>。</p>
+
+<h3 id="基本信息">基本信息</h3>
+
+<p>安装完成后，可以运行 <code>dotnet</code> 命令：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet --list-sdks
+5.0.102 <span style="color:#f92672">[</span>/usr/share/dotnet/sdk<span style="color:#f92672">]</span>
+$ dotnet --list-runtimes
+Microsoft.AspNetCore.App 5.0.2 <span style="color:#f92672">[</span>/usr/share/dotnet/shared/Microsoft.AspNetCore.App<span style="color:#f92672">]</span>
+Microsoft.NETCore.App 5.0.2 <span style="color:#f92672">[</span>/usr/share/dotnet/shared/Microsoft.NETCore.App<span style="color:#f92672">]</span>
+$ dotnet --info
+.NET SDK <span style="color:#f92672">(</span>reflecting any global.json<span style="color:#f92672">)</span>:
+ Version:   5.0.102
+ Commit:    71365b4d42
+
+Runtime Environment:
+ OS Name:     ubuntu
+ OS Version:  20.04
+ OS Platform: Linux
+ RID:         ubuntu.20.04-x64
+ Base Path:   /usr/share/dotnet/sdk/5.0.102/
+
+Host <span style="color:#f92672">(</span>useful <span style="color:#66d9ef">for</span> support<span style="color:#f92672">)</span>:
+  Version: 5.0.2
+  Commit:  cb5f173b96
+
+.NET SDKs installed:
+  5.0.102 <span style="color:#f92672">[</span>/usr/share/dotnet/sdk<span style="color:#f92672">]</span>
+
+.NET runtimes installed:
+  Microsoft.AspNetCore.App 5.0.2 <span style="color:#f92672">[</span>/usr/share/dotnet/shared/Microsoft.AspNetCore.App<span style="color:#f92672">]</span>
+  Microsoft.NETCore.App 5.0.2 <span style="color:#f92672">[</span>/usr/share/dotnet/shared/Microsoft.NETCore.App<span style="color:#f92672">]</span>
+
+To install additional .NET runtimes or SDKs:
+  https://aka.ms/dotnet-download</code></pre></div>
+<p>比较让我惊喜的是，里面带了一个 F# 解释器：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet fsi
+
+Microsoft <span style="color:#f92672">(</span>R<span style="color:#f92672">)</span> F# Interactive version 11.0.0.0 <span style="color:#66d9ef">for</span> F# 5.0
+Copyright <span style="color:#f92672">(</span>c<span style="color:#f92672">)</span> Microsoft Corporation. All Rights Reserved.
+
+For help type <span style="color:#75715e">#help;;</span>
+
+&gt;</code></pre></div>
+<h3 id="安装-coyote">安装 Coyote</h3>
+
+<p>安装 <code>coyote</code> （以及其他任何 <code>nuget</code> 包）很方便：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet tool install --global Microsoft.Coyote.CLI
+$ dotnet tool update --global Microsoft.Coyote.CLI <span style="color:#75715e"># 更新 coyote</span>
+$ dotnet tool list --global</code></pre></div>
+<h3 id="hello-world">Hello world!</h3>
+
+<p>创建一个空的终端项目，并编译之：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ mkdir hello; cd hello
+$ dotnet new console  <span style="color:#75715e"># will create hello.csproj</span>
+$ dotnet build
+$ ./bin/Debug/net5.0/hello
+Hello World!</code></pre></div>
+<p>上面的 <code>dotnet build</code> 以及执行程序可以合并成一条<code>dotnet run</code>命令。另外，
+可以运行 <code>dotnet clean</code> 清除编译结果。</p>
+
+<p>可以建立一个<code>sln</code>文件来管理多个工程：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sh" data-lang="sh">$ dotnet new sln
+$ dotnet sln add hello.csproj
+$ dotnet sln list  <span style="color:#75715e"># list projects</span></code></pre></div>
+<p>如果从网上下载了一个 .Net Core 项目的源代码，本地先运行 <code>dotnet restore</code>
+重建依赖。</p>
+
+<h3 id="疑似-bug">疑似 BUG</h3>
+
+<p>运行 <code>dotnet new sln -n xxx</code> 或者 <code>dotnet new console</code> 可能会挂住，有
+些时候还可能不响应 <code>CTRL-C</code>，这时候只能找到进程号并<code>kill -TERM</code>。</p>
+
+<ul>
+<li><a href="https://github.com/microsoft/dotnet/issues/1239">dotnet/issues/1239</a></li>
+<li><a href="https://github.com/dotnet/templating/pull/2307">dotnet/templating/pull/2307</a></li>
+<li><a href="https://github.com/dotnet/templating/pull/2341">dotnet/templating/pull/2341</a></li>
+</ul>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Deadlock in Groovy 2.4.8 &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Deadlock in Groovy 2.4.8
+                    </h1>
+                    <h2 class="headline">
+                    May 11, 2018 18:39
+                    · 379 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/groovy">groovy</a>
+                          
+                              <a href="https://live4thee.github.io/tags/java">java</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>前段时间，为了解决 <code>GroovyShell</code> 中的一个内存泄漏问题，把 <code>groovy</code>
+从 2.4.7 升级到了 2.4.8，没想到 2.4.8 中解决内存泄漏的时候，引入了一个
+高危bug：会导致线程死锁。
+c.f. <a href="https://issues.apache.org/jira/browse/GROOVY-8067">GROOVY-8067</a></p>
+
+<p><code>jstack</code> 的信息有个明显特征：一堆线程 <code>WAITING</code> 在 <code>LockableObject.java:37</code></p>
+<pre><code>java.lang.Thread.State: WAITING (parking)
+...
+at org.codehaus.groovy.util.LockableObject.lock(LockableObject.java:37)
+...</code></pre>
+<p>以此为关键字，搜索引擎中第一条信息就是 <code>jenkins-ci</code> 对该问题的
+<a href="https://issues.jenkins-ci.org/browse/JENKINS-43197">讨论</a>。</p>
+
+<h2 id="反思">反思</h2>
+
+<p>其实这个问题之前在测内存泄漏的时候，也碰到过，每次都能重现。<code>VisualVM</code>
+的图形展示很规律：两次 Full GC 后，线程活动图进入心跳停止线状态。不过
+由于当时看起来绕过了这个问题，没有细揪。</p>
+
+<h2 id="抽象">抽象</h2>
+
+<p>反查到 GitHub 上该问题的
+<a href="https://github.com/apache/groovy/pull/489">补丁</a>，有一个不大不小的感
+慨：尽量用 <code>Concurrent Collection</code> 或者 <code>Collections.synchronizedXXX</code>
+而不是 <code>synchronized</code> 关键字。性能的一丁点压榨永远比不上代码的清晰、健
+壮性来得重要。</p>
+
+<h2 id="博客">博客</h2>
+
+<p>通过 GitHub 上的讨论，找到了 <code>Jochen Theodorou</code> (Groovy 项目的 Leader)
+的<a href="https://blackdragsview.blogspot.com">博客</a>。最后一篇文章停留在
+2015/4/13，根据
+<a href="https://en.wikipedia.org/wiki/Groovy_(programming_language)">维基百科</a>
+，正是 Pivotal 停止赞助 Groovy &amp; Grails 项目的时间点。</p>
+
+<p>2018/4/20，Pivotal 在纽约证券交易所上市。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

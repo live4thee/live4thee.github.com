@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Random Bits (3) &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Random Bits (3)
+                    </h1>
+                    <h2 class="headline">
+                    Jun 12, 2020 00:04
+                    · 305 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/zstack">zstack</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>最近救了两场火，聊以记录。</p>
+
+<h2 id="vyos-on-arm64">Vyos on ARM64</h2>
+
+<p>同学终于搞出可用的 Vyos ARM64 镜像，但 <code>commit</code> 总是报错。上去看了一下，
+默认的 <code>Perl</code> 版本和 <code>perl-modules</code> 版本不一样。重新编译了 Vyatta 相关的包，
+去除不正确的 <code>perl-modules</code> 依赖即可。</p>
+
+<h2 id="openssh-8-2-for-centos-7">OpenSSH 8.2 for CentOS 7</h2>
+
+<p>CentOS 7 上没法直接用 CentOS 8 的 OpenSSH <code>rpm</code> 包，需要自己动手编译。
+源代码里自带的 <code>contrib/redhat/openssh.spec</code> 需要小修改一下。最有意思
+的还是 <code>Fedora Project</code> 自己的<a href="https://docs.fedoraproject.org/en-US/packaging-guidelines/Scriptlets/">文档</a>，
+解释了各种 <code>trigger</code> 脚本的执行时序和条件。深入理解 <code>spec</code> 文件的好帮手。</p>
+
+<table>
+<thead>
+<tr>
+<th>-</th>
+<th>install</th>
+<th>upgrade</th>
+<th>uninstall</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>%pretrans</td>
+<td>$1 == 0</td>
+<td>$1 == 0</td>
+<td>(N/A)</td>
+</tr>
+
+<tr>
+<td>%pre</td>
+<td>$1 == 1</td>
+<td>$1 == 2</td>
+<td>(N/A)</td>
+</tr>
+
+<tr>
+<td>%post</td>
+<td>$1 == 1</td>
+<td>$1 == 2</td>
+<td>(N/A)</td>
+</tr>
+
+<tr>
+<td>%preun</td>
+<td>(N/A)</td>
+<td>$1 == 1</td>
+<td>$1 == 0</td>
+</tr>
+
+<tr>
+<td>%postun</td>
+<td>(N/A)</td>
+<td>$1 == 1</td>
+<td>$1 == 0</td>
+</tr>
+
+<tr>
+<td>%posttrans</td>
+<td>$1 == 0</td>
+<td>$1 == 0</td>
+<td>(N/A)</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="net-schmizz-sshj-with-openssh-8-2">net.schmizz sshj with OpenSSH 8.2</h2>
+
+<p>CentOS 7 上的 OpenSSH-8.2 是编译出来了，安装、升级也都挺好使。碰到了
+sshj 报错协商密钥交换算法失败。似乎 <code>sshj</code> 只支持 DH-G-sha1，尝试升级了
+其依赖的 <code>bcprov-jdk16</code> 也不顶用。改用 <code>jsch</code> 解决之。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

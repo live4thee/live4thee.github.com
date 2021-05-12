@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Dell XPS13 BIOS Issue &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Dell XPS13 BIOS Issue
+                    </h1>
+                    <h2 class="headline">
+                    Sep 10, 2016 00:00
+                    · 886 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/misc">misc</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>这两天偶尔出现无线鼠标不工作的情况，引起一堆折腾。</p>
+
+<h2 id="现象">现象</h2>
+
+<p>开机后，无线鼠标不工作，<code>dmesg</code>发现如下错误：</p>
+<pre><code>usb 1-1: device descriptor read/64, error -71
+usb 1-1: new full-speed USB device number 4 using xhci_hcd
+usb 1-1: Device not responding to setup address.</code></pre>
+<p>怀疑是 Linux USB 驱动的问题，
+且<a href="https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1565292">launchpad</a>
+上搜到一个类似报告，但已经是半年前的了。</p>
+
+<ol>
+<li>鼠标电池刚换不久，且插在同事M的电脑可以工作；</li>
+<li>同事M的无线鼠标在我的电脑上可以工作；</li>
+<li>机房一只有线鼠标接上后，灯亮，但也不工作。</li>
+</ol>
+
+<h2 id="第一次尝试">第一次尝试</h2>
+
+<p>自己手工编译了 <code>4.8.0-rc5</code>，重启后再次插入无线鼠标，第一次不行，第二次
+可以了。加深了驱动可能有问题的怀疑。</p>
+<pre><code>cd 4.8.0-rc5
+/bin/cp -f /boot/config-`uname -r` .config
+make menuconfig
+
+make-kpkg clean
+fakeroot make-kpkg --initrd --revision=liq-9350 kernel_image -j 4</code></pre>
+<h2 id="第二天">第二天</h2>
+
+<p>启动电脑后发现，无线鼠标还是罢工了。新老内核都不行。搜到一篇文章，
+<a href="https://paulphilippov.com/articles/how-to-fix-device-not-accepting-address-error">How to fix &ldquo;device not accepting address&rdquo; error</a>
+，怀疑是硬件问题。按照文章里的建议，关机、重启，试了几次，悲剧依旧。于
+是，我进BIOS里面查看USB设置，关掉了几个<code>看似无用</code>的选项。</p>
+
+<h2 id="更悲剧了">更悲剧了</h2>
+
+<p>退出BIOS，重启发现没有 <code>Dell</code> 的 logo，启动时显示器的分辨率很低。能够
+顺利引导至 GRUB （显示很差），然后进入系统。但是：</p>
+
+<ol>
+<li>触摸板中下的LED灯规则的闪烁，7次白色，2次橙色，循环往复；</li>
+<li>再也进不了 BIOS 了。</li>
+</ol>
+
+<p>Google了一下，找到 reddit 一个
+<a href="https://www.reddit.com/r/Dell/comments/41qqs8/xps_13_9350_bios_setup_not_accessible/">帖子</a>
+，确定这是因为在 BIOS 的 USB 设置里面取消掉 Thunderbolt 导致的。Dell
+的 BIOS 很坑爹啊！</p>
+
+<h2 id="freedos">FreeDOS</h2>
+
+<p>发现官网有新 BIOS，因为之前做过一个现成的 FreeDOS 启动U盘，专门用来升
+级BIOS的。希望升级一下 BIOS 可以绕过该问题。但是，启动不了。往U盘写了
+个 UEFI GRUB，可以进入 grub，但是加载 FreeDOS 的时候会死掉。</p>
+
+<h2 id="摸黑操作">摸黑操作</h2>
+
+<p>翻开笔记本背面，想给BIOS放电，但是六颗眼屎大的螺丝居然都是六角梅花。吐
+血。看到另一篇<a href="eggheadstock.com/dell-xps-13-unable-access-bios/">文章</a>，
+说先F12改变启动设置后再F2，可以看见BIOS部分设置，但是需要摸黑操作。折
+腾了几把，运气不错，顺利恢复。再次试了下，FreeDOS也可以启动了。</p>
+
+<h2 id="结案">结案</h2>
+
+<p>大家都是用的 DELL XPS 13，但是：</p>
+
+<ol>
+<li>DELL 的 BIOS 很坑；</li>
+<li>鼠标不工作确实是硬件问题，不是电脑的USB口，而是我的鼠标坏了；</li>
+<li>我的鼠标在同事G的笔记本也不能工作，在M的笔记本却一直能工作；</li>
+<li>之前那个有线鼠标在G的笔记本确实也不能工作；</li>
+<li>BIOS操作界面对键盘不友好（比如：不带热键，幸好还有TAB）是耍流氓。</li>
+</ol>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

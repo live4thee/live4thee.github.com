@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mm on Life as a Programmer</title>
+    <link>https://live4thee.github.io/tags/mm/</link>
+    <description>Recent content in mm on Life as a Programmer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Fri, 12 Apr 2019 10:28:42 +0800</lastBuildDate>
+    
+	<atom:link href="https://live4thee.github.io/tags/mm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Interpreting Linux OOM Logs (1/2)</title>
+      <link>https://live4thee.github.io/posts/2019-04-12-interpreting-linux-oom-logs/</link>
+      <pubDate>Fri, 12 Apr 2019 10:28:42 +0800</pubDate>
+      
+      <guid>https://live4thee.github.io/posts/2019-04-12-interpreting-linux-oom-logs/</guid>
+      <description>本文描述如何分析 Linux OOM 日志。下面的日志去掉了开头的时间戳。 HOST1 kernel: prometheus invoked oom-killer: gfp_mask=0x0, order=0, oom_score_adj=0 HOST1 kernel: prometheus cpuset=docker-f55e8d749684a0746aa1cb3d186df370848ba502cc19d249bf732450de5a2f30.scope mems_allowed=0-3 HOST1 kernel: CPU: 88 PID: 49521 Comm: prometheus Tainted: G OE ------------ 3.10.0-327.36.1.el7.x86_64 #1 HOST1 kernel: Hardware name: Dell Inc. PowerEdge R930/0Y0V4F, BIOS 2.4.3 07/07/2017 HOST1 kernel: ffff88bf0612f300 00000000cbfaa699</description>
+    </item>
+    
+  </channel>
+</rss>

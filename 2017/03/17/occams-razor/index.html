@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		
+		
+		<meta name="generator" content="Hugo 0.68.3" />
+		<title>Occam&#39;s Razor &middot; Life as a Programmer</title>
+		<link rel="shortcut icon" href="https://live4thee.github.io/images/favicon.ico">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/style.css">
+		<link rel="stylesheet" href="https://live4thee.github.io/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://live4thee.github.io/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://live4thee.github.io/index.xml" rel="alternate" type="application/rss+xml" title="Life as a Programmer" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='https://live4thee.github.io/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='https://live4thee.github.io/posts'>Archive</a>
+	<a href='https://live4thee.github.io/tags'>Tags</a>
+	<a href='https://live4thee.github.io/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://live4thee.github.io/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Occam&#39;s Razor
+                    </h1>
+                    <h2 class="headline">
+                    Mar 17, 2017 00:00
+                    · 542 words
+                    · 2 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="https://live4thee.github.io/tags/zstack">zstack</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                <section id="post-body">
+                    
+
+<p>今天在解决
+<a href="https://github.com/zstackio/issues/issues/2259">issue #2259</a>的过程中，
+突然发现，该问题的现象能够很容易地解释
+<a href="https://github.com/zstackio/issues/issues/1235">issue #1235</a>。而#1235
+曾经被认为是一个不可思议的一个老大难问题，参详了好久，做了两次修复，但
+偶尔还是能够重现。不过现在我确信，#2259 描述的步骤正是一直没有注意到的
+复现步骤。简单、而且容易重复。</p>
+
+<h2 id="问题的根源">问题的根源</h2>
+
+<p><a href="http://zstack.org">Zstack</a> 中 Image 状态有两处，一个是 Image 表中维护
+的状态，另一个是镜像服务器表中维护的该镜像在镜像服务器中的状态。分两处
+的原因是，一个镜像可能同时存放在不同的镜像服务器中。镜像添加到不同的服
+务器中的时候，很可能有的已经可用，有的还未添加完毕。</p>
+
+<p>曾经以为做添加、删除的时候，操纵两张表的代码没有做到事务性，如果中间恰
+好重启管理节点，有可能会状态不一致 - 虽然这种可能性非常非常小。前两次
+的修复后仍然能复现就说明我们碰到的一定不是这种状况。</p>
+
+<h2 id="避免状态重复">避免状态重复</h2>
+
+<p>同步状态是最容易出 bug 的场景。如果用 <code>CloudTable</code>，可以把
+BackupStorage 的 uuid 当作 <code>Partition Key</code>，而 Image 本身的 <code>uuid</code> 当
+作 <code>Row Key</code>，这样 PK + RK 唯一决定了该 Image 在某 BS 里的状态。在关系
+型数据库里面，就需要把 PK+RK 拼接成一个 <code>Primary Key</code>。但这显然又不利
+于实现一个通用的查询框架，该框架中任何资源都由一个 uuid 做为主键。</p>
+
+<p>另一个办法是把 Image 表作为一个视图来实现，同一个镜像文件添加到不同的
+镜像服务器后，生成不同的镜像 uuid。</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'live4thee'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/live4thee">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://github.com/live4thee">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://twitter.com/live4thee">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> 
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://live4thee.github.io/js/jquery-3.3.1.min.js"></script>
+<script src="https://live4thee.github.io/js/main.js"></script>
+<script src="https://live4thee.github.io/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>
